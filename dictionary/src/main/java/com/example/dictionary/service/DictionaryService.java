@@ -8,15 +8,17 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DictionaryService {
 
-    public Entry getWord(String word) {
+    private static final String INVALID_REFERENCE = "Invalid reference";
 
-        Map<String, String> dictionary = DictionaryReference.getDictionary();
-        String definition = dictionary.get(word);
-        Entry entry = new Entry(word, definition);
+    public Entry getWord(String word) throws WordNotFoundException {
+
+        Entry entry = new Entry(word, DictionaryReference.getDictionary()
+                .get(word));
 
         if (entry.getDefinition() == null) {
             throw new WordNotFoundException("Word [" + word + "] not found.");
@@ -25,7 +27,7 @@ public class DictionaryService {
         return entry;
     }
 
-    public List<Entry> getWordsStartingWith(String value) {
+    public List<Entry> getWordsStartingWith(final String value) {
 
         return DictionaryReference.getDictionary()
                 .entrySet()
@@ -34,10 +36,10 @@ public class DictionaryService {
                         .startsWith(value))
                 .sorted(Map.Entry.comparingByKey(Comparator.naturalOrder()))
                 .map(entry -> new Entry(entry.getKey(), entry.getValue()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
-    public List<Entry> getWordsThatContain(String value) {
+    public List<Entry> getWordsThatContain(final String value) {
 
         return DictionaryReference.getDictionary()
                 .entrySet()
@@ -46,7 +48,7 @@ public class DictionaryService {
                         .contains(value))
                 .sorted(Map.Entry.comparingByKey(Comparator.naturalOrder()))
                 .map(entry -> new Entry(entry.getKey(), entry.getValue()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public List<Entry> getWordsThatContainConsecutiveDoubleLetters() {
@@ -54,11 +56,22 @@ public class DictionaryService {
         return DictionaryReference.getDictionary()
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getKey()
-                        .matches(".*([a-zA-Z])\\1.*"))
+                .filter(entry -> {
+
+                    String word = entry.getKey();
+                    boolean duplicateConsecutiveLetters  = false;
+                    for(int x = 1; x < word.length(); x++) {
+                        if(word.charAt(x) == word.charAt(x-1)) {
+                            duplicateConsecutiveLetters = true;
+                            break;
+                        }
+                    }
+                    return duplicateConsecutiveLetters;
+
+                })
                 .sorted(Map.Entry.comparingByKey(Comparator.naturalOrder()))
                 .map(entry -> new Entry(entry.getKey(), entry.getValue()))
-                .toList();
+                .collect(Collectors.toList());
     }
-}
 
+}

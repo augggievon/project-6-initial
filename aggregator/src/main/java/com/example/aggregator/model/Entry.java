@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class Entry implements Comparable<Entry> {
 
-    String word;
-    String definition;
+    private String word;
+    private String definition;
 
     public Entry() {
     }
@@ -44,23 +44,27 @@ public class Entry implements Comparable<Entry> {
     }
 
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Entry{");
-        sb.append("word='").append(word).append('\'');
-        sb.append(", definition='").append(definition).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }
+    public int compareTo(Entry that) {
 
-    @Override
-    public int compareTo(Entry o) {
-        if (this.word.compareTo(o.word) > 0) {
+        if (this.word.compareTo(that.word) > 0) {
             return 1;
-        } else if (this.word.compareTo(o.word) < 0) {
+        } else if (this.word.compareTo(that.word) < 0) {
             return -1;
         } else {
             return 0;
         }
     }
-}
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Entry {")
+                .append("word='")
+                .append(word)
+                .append('\'')
+                .append(", definition='")
+                .append(definition.substring(0, 20))
+                .append('\'')
+                .append('}');
+        return sb.toString();
+    }
+}
